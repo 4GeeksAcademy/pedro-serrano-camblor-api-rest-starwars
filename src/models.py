@@ -1,7 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Column, ForeignKey, Integer
-from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
-""" from __future__ import annotations """
+from sqlalchemy import String, Boolean, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List
 
 db = SQLAlchemy()
@@ -14,14 +13,13 @@ class User(db.Model):
     password: Mapped[str] = mapped_column(nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False)
 
-    favorites: Mapped[List["Favorites"]] = relationship(
-        back_populates="user")
+    favorites: Mapped[List["Favorites"]] = relationship(back_populates="user")
 
     def serialize(self):
         return {
             "id": self.id,
             "email": self.email,
-            "favorites": self.favorites,
+            "favorites": [favorite.serialize() for favorite in self.favorites],
             # do not serialize the password, its a security breach
         }
 
@@ -34,27 +32,29 @@ class Favorites(db.Model):
     vehicle_id: Mapped[int] = mapped_column(ForeignKey("vehicle.id"))
 
     user: Mapped["User"] = relationship(back_populates="favorites")
-    characters: Mapped["Character"] = relationship(back_populates="favorites")
-    planets: Mapped["Planet"] = relationship(back_populates="favorites")
-    vehicles: Mapped["Vehicle"] = relationship(back_populates="favorites")
+    character: Mapped["Character"] = relationship(back_populates="favorites")
+    planet: Mapped["Planet"] = relationship(back_populates="favorites")
+    vehicle: Mapped["Vehicle"] = relationship(back_populates="favorites")
 
     def serialize(self):
         return {
-            "id": self.id
+            "id": self.id,
+            "user_id": self.user_id,
+            "character_id": self.character_id,
+            "planet_id": self.planet_id,
+            "vehicle_id": self.vehicle_id
         }
 
 
 class Character(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(
-        String(120), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     homeworld_id: Mapped[int] = mapped_column(ForeignKey("planet.id"))
 
     favorites: Mapped[List["Favorites"]] = relationship(
         back_populates="character")
-    planet: Mapped["Planet"] = relationship(
-        back_populates="character")
-    vehicle: Mapped["Vehicle"] = relationship(
+    planet: Mapped["Planet"] = relationship(back_populates="characters")
+    vehicles: Mapped[List["Vehicle"]] = relationship(
         back_populates="character")
 
     def serialize(self):
@@ -67,42 +67,39 @@ class Character(db.Model):
 
 class Planet(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(
-        String(120), unique=True, nullable=False)
-    size: Mapped[str] = mapped_column(
-        String(120), unique=False, nullable=False)
+    name: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    size: Mapped[str] = mapped_column(String(120), nullable=False)
 
     favorites: Mapped[List["Favorites"]] = relationship(
         back_populates="planet")
-    characters: Mapped["Character"] = relationship(back_populates="planet")
-    vehicles: Mapped["Vehicle"] = relationship(back_populates="planet")
+    characters: Mapped[List["Character"]] = relationship(
+        back_populates="planet")
+    vehicles: Mapped[List["Vehicle"]] = relationship(back_populates="planet")
 
     def serialize(self):
         return {
             "id": self.id,
-            "name": self.email,
+            "name": self.name,
             "size": self.size
         }
 
 
 class Vehicle(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(
-        String(120), unique=True, nullable=False)
-    manufactoring_planet_id: Mapped[int] = mapped_column(ForeignKey("planet.id"))
+    name: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    manufacturing_planet_id: Mapped[int] = mapped_column(
+        ForeignKey("planet.id"))
     character_owner_id: Mapped[int] = mapped_column(ForeignKey("character.id"))
 
     favorites: Mapped[List["Favorites"]] = relationship(
         back_populates="vehicle")
-    planet: Mapped["Planet"] = relationship(
-        back_populates="vehicle")
-    character: Mapped["Character"] = relationship(
-        back_populates="vehicle")
-
+    planet: Mapped["Planet"] = relationship(back_populates="vehicles")
+    character: Mapped["Character"] = relationship(back_populates="vehicles")
 
     def serialize(self):
         return {
             "id": self.id,
             "name": self.name,
-            "homeworld_id": self.homeworld_id
+            "manufacturing_planet_id": self.manufacturing_planet_id,
+            "character_owner_id": self.character_owner_id
         }
