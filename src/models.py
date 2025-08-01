@@ -13,14 +13,13 @@ class User(db.Model):
     password: Mapped[str] = mapped_column(nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False)
 
-    favorites: Mapped[List["Favorites"]] = relationship(back_populates="user")
+    favorites: Mapped[List["Favorites"]] = relationship("Favorite", back_populates="user", cascade="all, delete-orphan")
 
     def serialize(self):
         return {
             "id": self.id,
             "email": self.email,
             "favorites": [favorite.serialize() for favorite in self.favorites],
-            # do not serialize the password, its a security breach
         }
 
 
