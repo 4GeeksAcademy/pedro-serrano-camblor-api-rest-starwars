@@ -8,40 +8,34 @@ db = SQLAlchemy()
 
 class User(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    email: Mapped[str] = mapped_column(
+    username: Mapped[str] = mapped_column(
         String(120), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
-    is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False)
 
-    favorites: Mapped[List["Favorites"]] = relationship("Favorite", back_populates="user", cascade="all, delete-orphan")
+    favorites: Mapped[List["Favorites"]] = relationship(
+        "Favorites", back_populates="user", cascade="all, delete-orphan")
 
     def serialize(self):
         return {
             "id": self.id,
+            "username": self.username,
             "email": self.email,
             "favorites": [favorite.serialize() for favorite in self.favorites],
         }
 
-
-class Favorites(db.Model):
-    id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    character_id: Mapped[int] = mapped_column(ForeignKey("character.id"))
-    planet_id: Mapped[int] = mapped_column(ForeignKey("planet.id"))
-    vehicle_id: Mapped[int] = mapped_column(ForeignKey("vehicle.id"))
-
-    user: Mapped["User"] = relationship(back_populates="favorites")
-    character: Mapped["Character"] = relationship(back_populates="favorites")
-    planet: Mapped["Planet"] = relationship(back_populates="favorites")
-    vehicle: Mapped["Vehicle"] = relationship(back_populates="favorites")
-
-    def serialize(self):
-        return {
+    """ def all_user_favorites(self):
+        # print(self.favorites)
+        results_favorites = list(map(lambda item: item.serialize(), self.favorites))
+        return{
             "id": self.id,
-            "user_id": self.user_id,
-            "character_id": self.character_id,
-            "planet_id": self.planet_id,
-            "vehicle_id": self.vehicle_id
+            "username": self.username,
+        } """
+        
+    def get_all_users(self):
+        return {
+            "user_id": self.id,
+            "user_name": self.username
         }
 
 
@@ -67,7 +61,8 @@ class Character(db.Model):
 class Planet(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
-    size: Mapped[str] = mapped_column(String(120), nullable=False)
+    size: Mapped[int] = mapped_column(nullable=False)
+    biome_type: Mapped[str] = mapped_column(String(120), nullable=False)
 
     favorites: Mapped[List["Favorites"]] = relationship(
         back_populates="planet")
@@ -79,7 +74,8 @@ class Planet(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "size": self.size
+            "size": self.size,
+            "biome_type": self.biome_type
         }
 
 
@@ -101,4 +97,26 @@ class Vehicle(db.Model):
             "name": self.name,
             "manufacturing_planet_id": self.manufacturing_planet_id,
             "character_owner_id": self.character_owner_id
+        }
+
+
+class Favorites(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    character_id: Mapped[int] = mapped_column(ForeignKey("character.id"))
+    planet_id: Mapped[int] = mapped_column(ForeignKey("planet.id"))
+    vehicle_id: Mapped[int] = mapped_column(ForeignKey("vehicle.id"))
+
+    user: Mapped["User"] = relationship(back_populates="favorites")
+    character: Mapped["Character"] = relationship(back_populates="favorites")
+    planet: Mapped["Planet"] = relationship(back_populates="favorites")
+    vehicle: Mapped["Vehicle"] = relationship(back_populates="favorites")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "character_id": self.character_id,
+            "planet_id": self.planet_id,
+            "vehicle_id": self.vehicle_id
         }

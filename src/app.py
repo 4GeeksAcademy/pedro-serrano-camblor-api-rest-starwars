@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Character
 #from models import Person
 
 app = Flask(__name__)
@@ -36,14 +36,47 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+# Instancia de objetos
+users = User()
+characters = Character()
+
+# Obtener todos los users
 @app.route('/user', methods=['GET'])
-def handle_hello():
+def list_all_users():
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+    try:
+        user_list = users.query.all()
+        # user_list = users.serialize()
+        """ response_body = user_list
 
-    return jsonify(response_body), 200
+        if user_list is None:
+            return jsonify({"Error": "The user does not exist"}), 400 """
+        return jsonify([user.serialize() for user in user_list]), 200
+    
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
+    
+# Obtener todos los characters
+@app.route('/character', methods=['GET'])
+def list_all_characters():
+
+    try:
+        # char_list = characters.get_all_characters()
+        # char_list = characters.serialize()
+        response_body = char_list
+
+        if char_list is None:
+            return jsonify({"Error": "The character does not exist"}), 400
+        return jsonify(response_body), 200
+    
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
+
+
+
+
+# Para los favoritos del user ---> query_user = db.session.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
