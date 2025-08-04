@@ -8,7 +8,8 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Character
+from models import db, User, Character, Planet, Vehicle, Favorites
+from sqlalchemy import select
 #from models import Person
 
 app = Flask(__name__)
@@ -36,22 +37,23 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-# Instancia de objetos
-users = User()
+# Instancia de objetos - solo se usará para el método POST (crear nuevo registro en las tablas)
+""" users = User()
 characters = Character()
+planets = Planet()
+vehicles = Vehicle()
+favorites = Favorites() """
 
+#OBTENER TODOS -----------------------------------------------------------------------------------------------------------------------------------------
 # Obtener todos los users
 @app.route('/user', methods=['GET'])
 def list_all_users():
 
     try:
-        user_list = users.query.all()
-        # user_list = users.serialize()
-        """ response_body = user_list
-
-        if user_list is None:
-            return jsonify({"Error": "The user does not exist"}), 400 """
-        return jsonify([user.serialize() for user in user_list]), 200
+        query_results = db.session.execute(select(User)).scalars().all()
+        results = list(map(lambda user: user.serialize(), query_results))
+                
+        return jsonify(results), 200
     
     except Exception as e:
         return jsonify({"Error": "Server error", "Message": str(e)}), 500
@@ -61,19 +63,56 @@ def list_all_users():
 def list_all_characters():
 
     try:
-        # char_list = characters.get_all_characters()
-        # char_list = characters.serialize()
-        response_body = char_list
-
-        if char_list is None:
-            return jsonify({"Error": "The character does not exist"}), 400
-        return jsonify(response_body), 200
+        query_results = db.session.execute(select(Character)).scalars().all()
+        results = list(map(lambda character: character.serialize(), query_results))
+                
+        return jsonify(results), 200
     
     except Exception as e:
         return jsonify({"Error": "Server error", "Message": str(e)}), 500
 
+# Obtener todos los planetas
+@app.route('/planet', methods=['GET'])
+def list_all_planets():
 
+    try:
+        query_results = db.session.execute(select(Planet)).scalars().all()
+        results = list(map(lambda planet: planet.serialize(), query_results))
+                
+        return jsonify(results), 200
+    
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
+    
+    
+# Obtener todos los vehiculos
+@app.route('/vehicle', methods=['GET'])
+def list_all_vehicles():
 
+    try:
+        query_results = db.session.execute(select(Vehicle)).scalars().all()
+        results = list(map(lambda vehicle: vehicle.serialize(), query_results))
+                
+        return jsonify(results), 200
+    
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
+    
+   
+# OBTENER UNO, POR ID -----------------------------------------------------------------------------------------------------------------------------------------
+# Obtener un user
+@app.route('/user/<int:user_id>', methods=['GET'])
+def list_one_user(user_id):
+
+    try:
+        query_results = db.session.execute(select(User).where(User.id == user_id)).scalar_one()
+        # results = list(map(lambda user: user.serialize(), query_results))
+        # print(query_results.serialize())
+                
+        return jsonify(query_results.serialize()), 200
+    
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
 
 # Para los favoritos del user ---> query_user = db.session.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
 
