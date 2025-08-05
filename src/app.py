@@ -139,7 +139,7 @@ def list_one_planet(planet_id):
 # Obtener un vehicle
 @app.route('/vehicle/<int:vehicle_id>', methods=['GET'])
 def list_one_vehicle(vehicle_id):
-
+    
     try:
         query_results = db.session.execute(select(Vehicle).where(Vehicle.id == vehicle_id)).scalar_one()  
         return jsonify(query_results.serialize()), 200
@@ -148,6 +148,27 @@ def list_one_vehicle(vehicle_id):
         return jsonify({"Error": "Server error", "Message": str(e)}), 500
     
     
+# MÉTODOS POST -----------------------------------------------------------------------------------------------------------------------------------------
+# Añade un nuevo character favorito al usuario actual con el id 
+@app.route('/favorite/character', methods=['POST'])
+def add_fav_character():
+
+    try:
+        # query_results = db.session.execute(select(User).where(User.id == user_id)).scalar_one()   
+        # return jsonify(query_results.serialize()), 200
+        
+        data = request.json
+        
+        favorite = Favorites(user_id = data["user_id"], character_id = data["character_id"])
+        db.session.add(favorite)
+        db.session.commit()
+        
+        return jsonify(favorite)
+    
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
+
+
 
 # Para los favoritos del user ---> query_user = db.session.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
 
