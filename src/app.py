@@ -105,14 +105,49 @@ def list_all_vehicles():
 def list_one_user(user_id):
 
     try:
-        query_results = db.session.execute(select(User).where(User.id == user_id)).scalar_one()
-        # results = list(map(lambda user: user.serialize(), query_results))
-        # print(query_results.serialize())
-                
+        query_results = db.session.execute(select(User).where(User.id == user_id)).scalar_one()   
         return jsonify(query_results.serialize()), 200
     
     except Exception as e:
         return jsonify({"Error": "Server error", "Message": str(e)}), 500
+    
+
+# Obtener un character
+@app.route('/character/<int:character_id>', methods=['GET'])
+def list_one_character(character_id):
+
+    try:
+        query_results = db.session.execute(select(Character).where(Character.id == character_id)).scalar_one()  
+        return jsonify(query_results.serialize()), 200
+    
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
+
+
+# Obtener un planet
+@app.route('/planet/<int:planet_id>', methods=['GET'])
+def list_one_planet(planet_id):
+
+    try:
+        query_results = db.session.execute(select(Planet).where(Planet.id == planet_id)).scalar_one()  
+        return jsonify(query_results.serialize()), 200
+    
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
+
+
+# Obtener un vehicle
+@app.route('/vehicle/<int:vehicle_id>', methods=['GET'])
+def list_one_vehicle(vehicle_id):
+
+    try:
+        query_results = db.session.execute(select(Vehicle).where(Vehicle.id == vehicle_id)).scalar_one()  
+        return jsonify(query_results.serialize()), 200
+    
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
+    
+    
 
 # Para los favoritos del user ---> query_user = db.session.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
 
