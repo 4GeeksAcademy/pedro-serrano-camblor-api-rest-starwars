@@ -103,9 +103,9 @@ class Vehicle(db.Model):
 class Favorites(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    character_id: Mapped[int] = mapped_column(ForeignKey("character.id"))
-    planet_id: Mapped[int] = mapped_column(ForeignKey("planet.id"))
-    vehicle_id: Mapped[int] = mapped_column(ForeignKey("vehicle.id"))
+    character_id: Mapped[int] = mapped_column(ForeignKey("character.id"), nullable=True)
+    planet_id: Mapped[int] = mapped_column(ForeignKey("planet.id"), nullable=True)
+    vehicle_id: Mapped[int] = mapped_column(ForeignKey("vehicle.id"), nullable=True)
 
     user: Mapped["User"] = relationship(back_populates="favorites")
     character: Mapped["Character"] = relationship(back_populates="favorites")
