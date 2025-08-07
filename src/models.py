@@ -42,7 +42,7 @@ class User(db.Model):
 class Character(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
-    homeworld_id: Mapped[int] = mapped_column(ForeignKey("planet.id"))
+    homeworld_id: Mapped[int] = mapped_column(ForeignKey("planet.id"), nullable=True)
 
     favorites: Mapped[List["Favorites"]] = relationship(
         back_populates="character")
@@ -83,8 +83,8 @@ class Vehicle(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     manufacturing_planet_id: Mapped[int] = mapped_column(
-        ForeignKey("planet.id"))
-    character_owner_id: Mapped[int] = mapped_column(ForeignKey("character.id"))
+        ForeignKey("planet.id"), nullable=True)
+    character_owner_id: Mapped[int] = mapped_column(ForeignKey("character.id"), nullable=True)
 
     favorites: Mapped[List["Favorites"]] = relationship(
         back_populates="vehicle")

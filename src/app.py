@@ -53,6 +53,7 @@ favorites = Favorites() """
 # OBTENER TODOS -----------------------------------------------------------------------------------------------------------------------------------------
 # Obtener todos los users
 
+
 @app.route('/user', methods=['GET'])
 def list_all_users():
 
@@ -66,6 +67,8 @@ def list_all_users():
         return jsonify({"Error": "Server error", "Message": str(e)}), 500
 
 # Obtener todos los characters
+
+
 @app.route('/character', methods=['GET'])
 def list_all_characters():
 
@@ -80,6 +83,8 @@ def list_all_characters():
         return jsonify({"Error": "Server error", "Message": str(e)}), 500
 
 # Obtener todos los planetas
+
+
 @app.route('/planet', methods=['GET'])
 def list_all_planets():
 
@@ -115,9 +120,8 @@ def list_all_favorites_from_user(user_id):
         query_results = db.session.execute(
             select(Favorites).where(Favorites.user_id == user_id)).scalars().all()
         results = list(map(lambda user: user.serialize(), query_results))
-        
+
         return jsonify(results), 200
-        
 
     except Exception as e:
         return jsonify({"Error": "Server error", "Message": str(e)}), 500
@@ -176,7 +180,6 @@ def list_one_vehicle(vehicle_id):
         return jsonify({"Error": "Server error", "Message": str(e)}), 500
 
 
-
 # MÉTODOS POST -----------------------------------------------------------------------------------------------------------------------------------------
 # Añade un nuevo character favorito al usuario actual con el id
 @app.route('/favorite/character', methods=['POST'])
@@ -232,7 +235,6 @@ def add_fav_vehicle():
         return jsonify({"Error": "Server error", "Message": str(e)}), 500
 
 
-
 # MÉTODOS delete -----------------------------------------------------------------------------------------------------------------------------------------
 # Elimina un character de la lista de favoritos del usuario actual
 @app.route('/favorite/character/<int:character_id>', methods=['DELETE'])
@@ -240,16 +242,15 @@ def remove_fav_character(character_id):
     try:
         data = request.json
         user_id = data.get("user_id")
-        
+
         seek_and_destroy = delete(Favorites).where(
             Favorites.user_id == user_id,
             Favorites.character_id == character_id
         )
-        
+
         db.session.execute(seek_and_destroy)
         db.session.commit()
 
-        
         return jsonify({"message": "Favorite character removed successfully"}), 200
 
     except Exception as e:
@@ -262,42 +263,71 @@ def remove_fav_planet(planet_id):
     try:
         data = request.json
         user_id = data.get("user_id")
-        
+
         seek_and_destroy = delete(Favorites).where(
             Favorites.user_id == user_id,
             Favorites.planet_id == planet_id
         )
-        
+
         db.session.execute(seek_and_destroy)
         db.session.commit()
 
-        
         return jsonify({"message": "Favorite planet removed successfully"}), 200
 
     except Exception as e:
         return jsonify({"Error": "Server error", "Message": str(e)}), 500
-    
-    
+
+
 # Elimina un vehicle de la lista de favoritos del usuario actual
 @app.route('/favorite/vehicle/<int:vehicle_id>', methods=['DELETE'])
 def remove_fav_vehicle(vehicle_id):
     try:
         data = request.json
         user_id = data.get("user_id")
-        
+
         seek_and_destroy = delete(Favorites).where(
             Favorites.user_id == user_id,
             Favorites.vehicle_id == vehicle_id
         )
-        
+
         db.session.execute(seek_and_destroy)
         db.session.commit()
 
-        
         return jsonify({"message": "Favorite vehicle removed successfully"}), 200
 
     except Exception as e:
         return jsonify({"Error": "Server error", "Message": str(e)}), 500
+
+
+# EXTRAS POST/PUT/DELETE Agregar, modificar y eliminar characters, planets, vehicles y users (???) de la DB -----------------------------------------------------------------------------------------------------
+# Agregar planeta a la db
+@app.route('/character', methods=['POST'])
+def add_new_character():
+
+    try:
+        data = request.json
+        print(data)
+
+        character = Character(name = data["name"])
+
+        db.session.add(character)
+        db.session.commit()
+
+        return jsonify({"message": "Favorite character added successfully", "The character added is": character.serialize()}), 200
+
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
+
+
+
+# AUTENTICACIÓN-----------------------------------------------------------------------------------------------------------------------------------------
+# Sign up
+
+
+# Login
+
+
+# Sign out
 
 
 # this only runs if `$ python src/app.py` is executed
