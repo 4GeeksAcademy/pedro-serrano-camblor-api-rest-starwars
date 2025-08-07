@@ -9,7 +9,7 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, Character, Planet, Vehicle, Favorites
-from sqlalchemy import select
+from sqlalchemy import select, delete
 # from models import Person
 
 app = Flask(__name__)
@@ -237,26 +237,67 @@ def add_fav_vehicle():
 # Elimina un character de la lista de favoritos del usuario actual
 @app.route('/favorite/character/<int:character_id>', methods=['DELETE'])
 def remove_fav_character(character_id):
-
     try:
         data = request.json
-        print(data)
-
-        # favorite = Favorites(
-        #     user_id=data["user_id"], character_id=data["character_id"], planet_id=None, vehicle_id=None)
-        # db.session.add(favorite)
-        # db.session.commit()
-
-        favorite = db.session.get(Favorites, character_id) 
-        db.session.delete(favorite)
+        user_id = data.get("user_id")
+        
+        seek_and_destroy = delete(Favorites).where(
+            Favorites.user_id == user_id,
+            Favorites.character_id == character_id
+        )
+        
+        db.session.execute(seek_and_destroy)
         db.session.commit()
 
-
-        return jsonify(favorite.serialize()), 200
+        
+        return jsonify({"message": "Favorite character removed successfully"}), 200
 
     except Exception as e:
         return jsonify({"Error": "Server error", "Message": str(e)}), 500
 
+
+# Elimina un planet de la lista de favoritos del usuario actual
+@app.route('/favorite/planet/<int:planet_id>', methods=['DELETE'])
+def remove_fav_character(planet_id):
+    try:
+        data = request.json
+        user_id = data.get("user_id")
+        
+        seek_and_destroy = delete(Favorites).where(
+            Favorites.user_id == user_id,
+            Favorites.planet_id == planet_id
+        )
+        
+        db.session.execute(seek_and_destroy)
+        db.session.commit()
+
+        
+        return jsonify({"message": "Favorite planet removed successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
+    
+    
+# Elimina un vehicle de la lista de favoritos del usuario actual
+@app.route('/favorite/vehicle/<int:vehicle_id>', methods=['DELETE'])
+def remove_fav_character(vehicle_id):
+    try:
+        data = request.json
+        user_id = data.get("user_id")
+        
+        seek_and_destroy = delete(Favorites).where(
+            Favorites.user_id == user_id,
+            Favorites.vehicle_id == vehicle_id
+        )
+        
+        db.session.execute(seek_and_destroy)
+        db.session.commit()
+
+        
+        return jsonify({"message": "Favorite vehicle removed successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
 
 
 # this only runs if `$ python src/app.py` is executed
