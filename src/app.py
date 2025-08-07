@@ -258,7 +258,7 @@ def remove_fav_character(character_id):
 
 # Elimina un planet de la lista de favoritos del usuario actual
 @app.route('/favorite/planet/<int:planet_id>', methods=['DELETE'])
-def remove_fav_character(planet_id):
+def remove_fav_planet(planet_id):
     try:
         data = request.json
         user_id = data.get("user_id")
@@ -280,7 +280,7 @@ def remove_fav_character(planet_id):
     
 # Elimina un vehicle de la lista de favoritos del usuario actual
 @app.route('/favorite/vehicle/<int:vehicle_id>', methods=['DELETE'])
-def remove_fav_character(vehicle_id):
+def remove_fav_vehicle(vehicle_id):
     try:
         data = request.json
         user_id = data.get("user_id")
