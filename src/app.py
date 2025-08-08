@@ -300,13 +300,13 @@ def remove_fav_vehicle(vehicle_id):
 
 
 # EXTRAS POST/PUT/DELETE Agregar, modificar y eliminar characters, planets, vehicles y users (???) de la DB -----------------------------------------------------------------------------------------------------
-# Agregar planeta a la db
+# Agregar character a la db
 @app.route('/character', methods=['POST'])
 def add_new_character():
 
     try:
         data = request.json
-        print(data)
+        # print(data)
 
         character = Character(name = data["name"])
 
@@ -317,10 +317,132 @@ def add_new_character():
 
     except Exception as e:
         return jsonify({"Error": "Server error", "Message": str(e)}), 500
+    
+    
+# Agregar planet a la db
+@app.route('/planet', methods=['POST'])
+def add_new_planet():
+
+    try:
+        data = request.json
+        # print(data)
+
+        planet = Planet(name = data["name"], size = data["size"], biome_type = data["biome_type"])
+
+        db.session.add(planet)
+        db.session.commit()
+
+        return jsonify({"message": "Favorite planet added successfully", "The planet added is": planet.serialize()}), 200
+
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
 
 
+# Agregar vehicle a la db
+@app.route('/vehicle', methods=['POST'])
+def add_new_vehicle():
 
-# AUTENTICACIÓN-----------------------------------------------------------------------------------------------------------------------------------------
+    try:
+        data = request.json
+        # print(data)
+
+        vehicle = Vehicle(name = data["name"])
+
+        db.session.add(vehicle)
+        db.session.commit()
+
+        return jsonify({"message": "Favorite vehicle added successfully", "The vehicle added is": vehicle.serialize()}), 200
+
+    except Exception as e:
+        return jsonify({"Error": "Server error", "Message": str(e)}), 500
+
+
+# Modificar character de la db
+@app.route('/character/<int:character_id>', methods=['PUT'])
+def edit_character(character_id):
+    try:
+        data = request.json
+        # print(data)
+
+        character = db.session.get(Character, character_id)
+        if character is None:
+            return jsonify({"error": "Character not found"}), 404
+
+        if "name" in data:
+            character.name = data["name"]
+        if "homeworld_id" in data:
+            character.homeworld_id = data["homeworld_id"]
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "Character updated successfully",
+            "character": character.serialize()
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": "Server error", "message": str(e)}), 500
+    
+    
+# Modificar planet de la db
+@app.route('/planet/<int:planet_id>', methods=['PUT'])
+def edit_planet(planet_id):
+    try:
+        data = request.json
+        # print(data)
+
+        planet = db.session.get(Planet, planet_id)
+        if planet is None:
+            return jsonify({"error": "Planet not found"}), 404
+
+        if "name" in data:
+            planet.name = data["name"]
+        if "homeworld_id" in data:
+            planet.size = data["size"]
+        if "biome_type" in data:
+            planet.biome_type = data["biome_type"]
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "Planet updated successfully",
+            "character": planet.serialize()
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": "Server error", "message": str(e)}), 500
+
+
+# Modificar vehicle de la db
+@app.route('/vehicle/<int:vehicle_id>', methods=['PUT'])
+def edit_vehicle(vehicle_id):
+    try:
+        data = request.json
+        # print(data)
+
+        vehicle = db.session.get(Vehicle, vehicle_id)
+        if vehicle is None:
+            return jsonify({"error": "Vehicle not found"}), 404
+
+        if "name" in data:
+            vehicle.name = data["name"]
+        if "hmanufacturing_planet_id" in data:
+            vehicle.manufacturing_planet_id = data["manufacturing_planet_id"]
+        if "character_owner_id" in data:
+            vehicle.character_owner_id = data["character_owner_id"]
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "Vehicle updated successfully",
+            "vehicle": vehicle.serialize()
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": "Server error", "message": str(e)}), 500
+
+
+# AUTENTICACIÓN------------------------------------------------------------------------------------------------------------------------------------------
 # Sign up
 
 
